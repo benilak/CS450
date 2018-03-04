@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from random import uniform
+import math
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
-import math
 
 
 def check_accuracy(predictions, targets):
@@ -129,13 +129,13 @@ class NetClassifier:
                                             1/math.sqrt(len(self.layers[i-1].nodes)))
                                     for n in range(len(self.layers[i - 1].nodes))]
 
-    def build_net(self, rate=0.2, cycles=1000):
+    def build_net(self, rate=0.2, cycles=100):
         """
         Builds the neural net.
 
         :param float rate: the learning rate used in this algorithm
         :param int cycles: the number of times to iterate over the entire data set
-        :return:
+        :return: a list of Layer objects that describes the neural net
         """
 
         # run the algorithm over the entire data set many times
@@ -206,3 +206,14 @@ class NetClassifier:
                         pass
             print(cycle)
         return self.layers
+
+pima = pd.read_csv('NeuralNet\\pima-indians-diabetes.txt')
+pima_data, pima_targets = np.hsplit( pima, [8])
+pima_data = pd.DataFrame(normalize(pima_data))
+data_train, data_test, targets_train, targets_test = train_test_split(pima_data, pima_targets, train_size=0.8, random_state=11)
+
+classifier = NetClassifier(data_train, targets_train, [4])
+neuralnet = classifier.build_net()
+model = NetModel(neuralnet)
+predictions = model.predict(data_test, targets_test)
+print(predictions[1])
