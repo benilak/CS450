@@ -1,0 +1,72 @@
+import numpy as np
+import time
+
+
+def calc_entropy(set, targets):
+
+    # feature_types are the values a feature can assume
+    feature_types, totals = np.unique(set, return_counts=True)
+
+    # the classes are the values the target feature can assume
+    classes = np.unique(targets)
+
+    # this array will be filled in with the counts for each class per feature type
+    # where the row is feature type, and column is the class
+    ntypes = np.zeros(shape=(len(feature_types), len(classes)), dtype=int)
+
+    # this iterates through the data and fills in the 'ntypes' array with the appropriate counts
+    for ix1, f_type in enumerate(feature_types):
+        for ix2, c_type in enumerate(classes):
+            ntypes[ix1, ix2] = np.count_nonzero((set == f_type) & (targets == c_type))
+
+    entropy = 0
+    for ix1, f_type in enumerate(ntypes):
+
+        # the inner loop calculates the entropy of each type (t_entropy)
+        t_entropy = 0
+        for ix2, ntype in enumerate(f_type):
+            t_entropy -= ntype / totals[ix2] * np.log2(ntype / totals[ix2])
+
+        # this calculates the weighted average
+        entropy += totals[ix1] / len(set) * t_entropy
+
+    return entropy
+
+
+
+Good = 'Good'
+Average = 'Average'
+Low = 'Low'
+High = 'High'
+Poor = 'Poor'
+Yes = 'Yes'
+No = 'No'
+
+loans = [[Good, High, Good, Yes],
+[Good, High, Poor, Yes],
+[Good, Low, Good, Yes],
+[Good, Low, Poor, No],
+[Average, High, Good, Yes],
+[Average, Low, Poor, No],
+[Average, High, Poor, Yes],
+[Average, Low, Good, No],
+[Low, High, Good, Yes],
+[Low, High, Poor, No],
+[Low, Low, Good, No],
+[Low, Low, Poor, No]]
+
+loans = np.asarray(loans)
+loans_data = loans[:,0:3]
+loans_targets = loans[:,3]
+loans_credit = loans[:,0]
+loans_income = loans[:,1]
+loans_collateral = loans[:,2]
+
+print(calc_entropy(loans_credit, loans_targets))
+print(calc_entropy(loans_income, loans_targets))
+print(calc_entropy(loans_collateral, loans_targets))
+
+start = time.time()
+calc_entropy(loans_credit, loans_targets)
+end = time.time()
+print(end - start)

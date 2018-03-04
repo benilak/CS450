@@ -1,0 +1,13 @@
+import numpy as np
+
+def find_leaf(row):
+    for child in tree.children:
+        if row[tree.name] == child:
+            if tree.children[child] == 'LEAF':
+                return tree.children[child].name
+            find_leaf()
+
+
+def predict(tree):
+    for row in self.data_test:
+        find_leaf()
