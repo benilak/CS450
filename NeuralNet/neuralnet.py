@@ -1,3 +1,8 @@
+"""
+A neural net classifier that employs the Multi-layer Perceptron algorithm to produce a model.
+"""
+
+
 import pandas as pd
 import numpy as np
 from random import uniform
