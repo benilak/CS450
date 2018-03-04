@@ -4,6 +4,8 @@ from random import uniform
 import math
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
 
 
 def check_accuracy(predictions, targets):
@@ -86,6 +88,7 @@ class NetModel:
                         product = [j * k for j, k in zipp]
                         node.value = 1 / (1 + math.exp(-math.fsum(product)))
 
+            # the prediction for one row - for whichever output node has the highest value, choose its corresponding class
             prediction = classes[np.argmax([node.value for node in self.net[-1].nodes])]
             predictions.append(prediction)
 
@@ -138,8 +141,15 @@ class NetClassifier:
         :return: a list of Layer objects that describes the neural net
         """
 
+        # for testing accuracy of model as it learns
+        # fills list with the correct number of targets "predicted" per each cycle
+        cycle_correct = []
+
         # run the algorithm over the entire data set many times
         for cycle in range(cycles):
+
+            ncorrect = 0
+
             # for each row in the data, iterate over each layer
             for r in range(self.data.shape[0]):
 
@@ -159,12 +169,18 @@ class NetClassifier:
                                 v_zip = zip(values, node.weights)
                                 v_product = [j * k for j, k in v_zip]
                                 node.value = 1 / (1 + math.exp(-math.fsum(v_product)))
+                    # update values for the output nodes
                     else:
                         for n, node in enumerate(layer.nodes):
                             values = [node.value for node in self.layers[i - 1].nodes]
                             v_zip = zip(values, node.weights)
                             v_product = [j * k for j, k in v_zip]
                             node.value = 1 / (1 + math.exp(-math.fsum(v_product)))
+
+                # for testing accuracy of the net as it learns
+                prediction = self.classes[np.argmax([node.value for node in self.layers[-1].nodes])]
+                if prediction == self.targets.iloc[r]:
+                    ncorrect += 1
 
                 # PROPAGATE BACK through each layer
                 for i, layer in reversed(list(enumerate(self.layers))):
@@ -204,16 +220,11 @@ class NetClassifier:
                     # the input nodes do not have errors or weights
                     else:
                         pass
+
+            # a visual aid to see how quickly the program is running
             print(cycle)
-        return self.layers
 
-pima = pd.read_csv('NeuralNet\\pima-indians-diabetes.txt')
-pima_data, pima_targets = np.hsplit( pima, [8])
-pima_data = pd.DataFrame(normalize(pima_data))
-data_train, data_test, targets_train, targets_test = train_test_split(pima_data, pima_targets, train_size=0.8, random_state=11)
+            # builds the list of correct guesses per cycle
+            cycle_correct.append(ncorrect)
 
-classifier = NetClassifier(data_train, targets_train, [4])
-neuralnet = classifier.build_net()
-model = NetModel(neuralnet)
-predictions = model.predict(data_test, targets_test)
-print(predictions[1])
+        return self.layers, cycle_correct

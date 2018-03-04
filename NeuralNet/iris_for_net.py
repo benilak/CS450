@@ -1,17 +1,18 @@
 """
-Iris data set configured to be passed through the NetClassifier.
+Iris data set preprocessed for the NetClassifier.
 """
 
 iris = pd.read_csv('iris.txt')
 trash, iris_data, iris_targets = np.hsplit(iris, [1, 5])
 iris_data = pd.DataFrame(normalize(iris_data))
 iris_targets = iris_targets.iloc[:, 0]
-data_train, data_test, targets_train, targets_test = \
-    train_test_split(iris_data, iris_targets, train_size=2/3, test_size=1/3, random_state=11)
+data_train, data_test, targets_train, targets_test = train_test_split(iris_data, iris_targets, train_size=2/3)
 
-# as of yet, this single hidden layer with four nodes seems to produce the most accurate predictions
-classifier = NetClassifier(data_train, targets_train, [4]) 
-neuralnet = classifier.build_net(rate=0.08, cycles=1000) # arbitrary parameters, typically 0.1 < rate < 0.4
-model = NetModel(neuralnet)
+classifier = NetClassifier(data_train, targets_train, [4])
+neuralnet = classifier.build_net(cycles=100)
+cycle_correct = pd.Series(neuralnet[1])
+plot = cycle_correct.plot.line()
+plt.show()
+model = NetModel(neuralnet[0])
 predictions = model.predict(data_test, targets_test)
 print(predictions[1])
