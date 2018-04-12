@@ -68,7 +68,7 @@ def check_accuracy(prediction, real):
 
 # load iris data set and normalize the numeric values
 iris = datasets.load_iris()
-iris_data = normalize(iris.data, axis=1)
+iris_data = normalize(iris.data, axis=0)
 
 # partition the data into training and testing subsets
 data_train, data_test, targets_train, targets_test = \
